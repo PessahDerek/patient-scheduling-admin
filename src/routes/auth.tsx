@@ -1,4 +1,4 @@
-import {createFileRoute, useParams} from '@tanstack/react-router'
+import {createFileRoute} from '@tanstack/react-router'
 import {Button, PasswordInput, Text, TextInput, Title} from '@mantine/core'
 import React from 'react'
 import {useMutation} from '@tanstack/react-query'
@@ -7,6 +7,8 @@ import {AxiosResponse} from 'axios'
 import {useCookies} from 'react-cookie'
 import {notifications} from '@mantine/notifications'
 import {errNotification} from '../libs/methods/short'
+import authStore from "../stores/authStore";
+import {useStore} from "zustand/react";
 
 export const Route = createFileRoute('/auth')({
     component: RouteComponent,
@@ -14,7 +16,7 @@ export const Route = createFileRoute('/auth')({
 
 function RouteComponent() {
     const [_data, setCookie, _rk] = useCookies(['loggedIn', 'role', 'token', 'firstName'])
-
+    const {logIn} = useStore(authStore)
     const {mutate, isPending} = useMutation({
         mutationKey: ['authentication'],
         mutationFn: async (
@@ -23,10 +25,7 @@ function RouteComponent() {
             AxiosResponse<{
                 token: string
                 message: string
-                user: {
-                    role: UserRole,
-                    firstName: string,
-                }
+                user: UserObj
             }>
         > => {
             e.preventDefault()
@@ -44,15 +43,15 @@ function RouteComponent() {
             })
         },
         onSuccess: (result) => {
-            setCookie('loggedIn', true)
-            setCookie('role', result.data.user.role)
-            setCookie('token', result.data.token)
-            setCookie('firstName', result.data.user.firstName)
-            localStorage.setItem('token', result.data.token)
+            logIn(result.data.user, result.data.token)
+            // setCookie('loggedIn', true)
+            // setCookie('role', result.data.user.role)
+            // setCookie('token', result.data.token)
+            // setCookie('firstName', result.data.user.firstName)
+            // localStorage.setItem('token', result.data.token)
             notifications.show({title: 'Success!', message: result.data.message})
         },
         onError: (error) => {
-            console.log(error)
             notifications.show(errNotification(error))
         },
     })

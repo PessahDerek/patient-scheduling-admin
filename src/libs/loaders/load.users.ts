@@ -4,7 +4,7 @@ import {AxiosResponse} from "axios";
 
 const loadUsers = (type: string): Promise<AxiosResponse<UserObj[]>> => {
     return new Promise((resolve, reject) => {
-        api.get(`/app/${type}`)
+        api.get(`/app/users`, {params: {type: type}})
             .then((res) => {
                 resolve(res)
             })

@@ -1,5 +1,5 @@
 import axios from "axios";
-import {TokenExpired} from "../instances/classes";
+import authStore from "../../stores/authStore";
 
 
 const api = axios.create({
@@ -9,7 +9,9 @@ const api = axios.create({
 
 /** Set request headers with every request */
 api.interceptors.request.use(config => {
-    const token = localStorage.getItem("token")
+    // const token = localStorage.getItem("token")
+    const local = sessionStorage.getItem("auth-store")
+    const token = local ? JSON.parse(local).state['token'] : null
     if (token)
         config.headers.Authorization = "Bearer " + token
     return config
@@ -18,9 +20,10 @@ api.interceptors.request.use(config => {
 // TODO: Work on automatic logging out
 api.interceptors.response.use(res => res, err => {
     if (err.status === 401) {
-        throw new TokenExpired()
+        authStore.getState().logOut()
+        // throw new TokenExpired()
     }
-    throw err
+    return Promise.reject(err)
 })
 
 

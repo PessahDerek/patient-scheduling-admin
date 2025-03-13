@@ -1,14 +1,12 @@
-import {AuthContext} from "../../context/Auth";
-import {useContext} from "react";
 import DashButton from "../buttons/DashButton";
 import ProfileBanner from "../ProfileBanner";
-import {Route, useRouter} from "@tanstack/react-router";
+import {useRouter} from "@tanstack/react-router";
 import {capitalize} from "../../libs/methods/short";
 
 
 export default function LeftNavBar() {
-    const {data: {role}} = useContext(AuthContext);
-    const router = useRouter();
+    // const {user} = useStore(authStore)
+    const router     = useRouter();
 
     const paths: {
         label: string,

@@ -1,44 +1,25 @@
-import React, {createContext, useEffect, useMemo, useState} from "react";
-import {useCookies} from "react-cookie";
+import React, {createContext, useEffect} from "react";
 import {useLocation, useNavigate} from "@tanstack/react-router";
+import {useStore} from "zustand/react";
+import authStore from "../stores/authStore";
 
-interface AuthDataObj {
-    loggedIn: boolean,
-    role: UserRole
-}
 
-export const AuthContext = createContext<{
-    data: AuthDataObj,
-    // setData: React.Dispatch<React.SetStateAction<AuthDataObj>>
-}>({
-    data: {
-        loggedIn: false,
-        role: "patient",
-    },
-    // setData: () => {
-    // }
-})
+export const AuthContext = createContext({})
 
 export default function AuthProvider({children}: { children: React.ReactNode }) {
-    const {href} = useLocation();
+    const {href, pathname} = useLocation();
     const navigate = useNavigate()
-    const [{loggedIn, role, token}, setCookie, _rk] = useCookies(["loggedIn", "role", "token"]);
-    const data: AuthDataObj = useMemo(() => {
-        return {loggedIn, role}
-    }, [loggedIn, role])
+    const {loggedIn, token} = useStore(authStore)
 
-    useEffect(() => {
-        const token = localStorage.getItem("token")
-        setCookie('loggedIn', token ?? undefined);
-    }, [])
     useEffect(() => {
         if (href.toLowerCase().startsWith("/auth") && (loggedIn && token))
             navigate({to: "/"}).catch(err => console.log(err));
-        // _rk('loggedIn')
+        if (!loggedIn && pathname !== '/auth')
+            navigate({to: "/auth"})
     }, [href, loggedIn])
 
     return (
-        <AuthContext.Provider value={{data}}>
+        <AuthContext.Provider value={{}}>
             {children}
         </AuthContext.Provider>
     )
